@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Apr 28 14:23:32 2020
 
-@author: yoges
-"""
 
 import pandas as pd
 import requests
@@ -14,7 +9,7 @@ import matplotlib.pyplot as plt
 import calendar
 import matplotlib.ticker as mtick
 
-#Getting url 
+#The link below contains the dropbox url which has a .csv file that contains BankAccountId 
 url = "https://www.dropbox.com/s/ib6s7wmvcj2ujgl/554625.csv?dl=1"
 
 #GET requests to the url
@@ -22,27 +17,16 @@ vizObj = requests.get(url)
 
 #Check if it was loaded sucessfully
 vizObj.status_code
-
-#Get the content into a zip folder
-#with open("vizObj.zip","wb") as f:
-#    f.write(vizObj.content)
-#   
-#getting the contents of he zip folder into another directory
-#with ZipFile("vizObj.zip","r") as zipObj:
-#    zipObj.extractall()
-#
-#delete the file
-#os.remove("vizObj.zip")
     
-#required whenworking offline
+#Write contents to bankAcctsForViz.csv file
 with open("bankAcctsForViz.csv","wb") as f:
     f.write(vizObj.content)
     
 
 #reading all three csv files
-start = pd.read_csv("startBalance.csv")
-bankAcct=pd.read_csv("bankAcctsForViz.csv")
-transData=pd.read_csv("bankTransactions.csv")
+start = pd.read_csv("startBalance.csv") #startBalance.csv holds starting balance for all bankAccountIds
+bankAcct=pd.read_csv("bankAcctsForViz.csv") #bankAccountIds fo which visualization needs to be created
+transData=pd.read_csv("bankTransactions.csv") #transactional data for all bankAccount Ids
 
 #merging the two files
 mergestartTransData = pd.merge(start,transData,how="outer",on="bankAcctID",suffixes=("_left","_right"))
@@ -96,7 +80,7 @@ mergeAll1["date_right"] = mergeAll1["date_right"].astype("datetime64[ns]")
 mergeAll1['day_of_week'] = mergeAll1['date_right'].dt.dayofweek
 days = {0:'Mon',1:'Tue',2:'Wed',3:'Thu',4:'Fri',5:'Sat',6:'Sun'}
 
-#using lamdbda and apply inbuilt functions of python
+#using lambda and apply inbuilt functions of python
 mergeAll1['day_of_week'] = mergeAll1['day_of_week'].apply(lambda x: days[x])
 
 #Filtering dataframe
@@ -108,10 +92,7 @@ mergeAll1 = mergeAll1.set_index([pd.Index(range(len(mergeAll1.transAmount1)))])
 #Filtering for Values greater than $200
 mergeAll1["transAmount2"] = list(x if x> 200 else 0 for x in mergeAll1["MaxAmount"])
 
-#mergeAll1.to_csv("mergeAll1.csv",index=False)
-#mergeAll.to_csv("mergeAll.csv",index=False)
-
-#------------------DO NOT MAKE ANY CHANGES ABOVE THIS --------------------------
+#------------------VISUALIZATION STARTS HERE --------------------------
 
 #CREATING FIGURE AND AXES OBJECT
 ax1 = []
@@ -175,4 +156,4 @@ for j in mergeAll1["bankAcctID"].unique():
     flag += 1
 
 #SAVING FIGURE
-fig.savefig("554625.pdf")
+fig.savefig("solution.pdf")
